@@ -31,21 +31,25 @@ public class GameManager : MonoBehaviour
 
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
+                MarkForDestructionUp();
                 MoveUp();
                 spawnCube = true;
             }
             if (Input.GetKeyDown(KeyCode.DownArrow))
             {
+                MarkForDestructionDown();
                 MoveDown();
                 spawnCube = true;
             }
             if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
+                MarkForDestructionLeft();
                 MoveLeft();
                 spawnCube = true;
             }
             if (Input.GetKeyDown(KeyCode.RightArrow))
             {
+                MarkForDestructionRight();
                 MoveRight();
                 spawnCube = true;
             }
@@ -162,7 +166,7 @@ public class GameManager : MonoBehaviour
         return animating;
     }
 
-    void MoveUp()
+    void MarkForDestructionUp()
     {
         for (int x = 0; x < grid.GetLength(0); x++)
         {
@@ -170,13 +174,67 @@ public class GameManager : MonoBehaviour
             {
                 if (grid[x, y] == null) continue;
 
-                for (int newY = grid.GetLength(1) - 1; newY > y; newY--)
+                int nextY = -1;
+                for (int i = y + 1; i < grid.GetLength(0); i++)
                 {
-                    if(grid[x, newY] == null)
+                    if (grid[x, i]) nextY = i;
+                }
+
+                if (nextY > -1 && HaveSameColor(grid[x, y], grid[x, nextY]))
+                {
+                    toDestroy[x, nextY] = grid[x, nextY];
+                    grid[x, nextY] = grid[x, y];
+                    grid[x, y] = null;
+                    IncreaseColor(grid[x, nextY]);
+                    continue;
+                }
+            }
+        }
+    }
+
+    void MoveUp()
+    {
+        for (int x = 0; x < grid.GetLength(0); x++)
+        {
+            for (int y = grid.GetLength(1) - 2; y >= 0; y--)
+            {
+                if (grid[x, y] == null) continue;
+                // An attempt at combining cubes
+                //for (int newY = grid.GetLength(1) - 1; newY > y; newY--)
+                for (int newY = y + 1, currY = y; newY < grid.GetLength(1); newY++, currY++)
+                {
+                    if (toDestroy[x, currY]) break;
+                    if (grid[x, newY] == null)
                     {
-                        grid[x, newY] = grid[x, y];
-                        grid[x, y] = null;
+                        grid[x, newY] = grid[x, currY];
+                        grid[x, currY] = null;
                     }
+                }
+            }
+        }
+    }
+
+    void MarkForDestructionDown()
+    {
+        for (int x = 0; x < grid.GetLength(0); x++)
+        {
+            for (int y = 0; y < grid.GetLength(1); y++)
+            {
+                if (grid[x, y] == null) continue;
+                // An attempt at combining cubes.
+                int nextY = -1;
+                for (int i = y - 1; i >= 0; i--)
+                {
+                    if (grid[x, i]) nextY = i;
+                }
+
+                if (nextY > -1 && HaveSameColor(grid[x, y], grid[x, nextY]))
+                {
+                    toDestroy[x, nextY] = grid[x, nextY];
+                    grid[x, nextY] = grid[x, y];
+                    grid[x, y] = null;
+                    IncreaseColor(grid[x, nextY]);
+                    continue;
                 }
             }
         }
@@ -189,14 +247,57 @@ public class GameManager : MonoBehaviour
             for (int y = 0; y < grid.GetLength(1); y++)
             {
                 if (grid[x, y] == null) continue;
+                // An attempt at combining cubes.
+                //int nextY = -1;
+                //for (int i = y - 1; i >= 0; i--)
+                //{
+                //    if (grid[x, i]) nextY = i;
+                //}
 
-                for (int newY = 0; newY < y; newY++)
+                //if (nextY > -1 && HaveSameColor(grid[x, y], grid[x, nextY]))
+                //{
+                //    toDestroy[x, nextY] = grid[x, nextY];
+                //    grid[x, nextY] = grid[x, y];
+                //    grid[x, y] = null;
+                //    IncreaseColor(grid[x, nextY]);
+                //    continue;
+                //}
+
+                //for (int newY = 0; newY < y; newY++)
+                for (int newY = y - 1, currY = y; newY > -1; newY--, currY--)
                 {
+                    if (toDestroy[x, currY]) break;
                     if (grid[x, newY] == null)
                     {
-                        grid[x, newY] = grid[x, y];
-                        grid[x, y] = null;
+                        grid[x, newY] = grid[x, currY];
+                        grid[x, currY] = null;
                     }
+                }
+            }
+        }
+    }
+
+    void MarkForDestructionLeft()
+    {
+        for (int x = 0; x < grid.GetLength(0); x++)
+        {
+            for (int y = 0; y < grid.GetLength(1); y++)
+            {
+                if (grid[x, y] == null) continue;
+
+                // An attempt at combining cubes.
+                int nextX = -1;
+                for (int i = x - 1; i >= 0; i--)
+                {
+                    if (grid[i, y]) nextX = i;
+                }
+
+                if (nextX > -1 && HaveSameColor(grid[x, y], grid[nextX, y]))
+                {
+                    toDestroy[nextX, y] = grid[nextX, y];
+                    grid[nextX, y] = grid[x, y];
+                    grid[x, y] = null;
+                    IncreaseColor(grid[nextX, y]);
                 }
             }
         }
@@ -211,9 +312,46 @@ public class GameManager : MonoBehaviour
                 if (grid[x, y] == null) continue;
 
                 // An attempt at combining cubes.
-                /*
+                //int nextX = -1;
+                //for (int i = x - 1; i >= 0; i--)
+                //{
+                //    if (grid[i, y]) nextX = i;
+                //}
+
+                //if (nextX > -1 && HaveSameColor(grid[x, y], grid[nextX, y]))
+                //{
+                //    toDestroy[nextX, y] = grid[nextX, y];
+                //    grid[nextX, y] = grid[x, y];
+                //    grid[x, y] = null;
+                //    IncreaseColor(grid[nextX, y]);
+                //    continue;
+                //}
+
+                //for (int newX = 0; newX < x; newX++)
+                for (int newX = x - 1, currX = x; newX > -1; newX--, currX--)
+                {
+                    if (toDestroy[currX, y]) break;
+                    if (grid[newX, y] == null)
+                    {
+                        grid[newX, y] = grid[currX, y];
+                        grid[currX, y] = null;
+                    }
+                }
+            }
+        }
+    }
+
+    void MarkForDestructionRight()
+    {
+        for (int x = grid.GetLength(0) - 2; x >= 0; x--)
+        {
+            for (int y = 0; y < grid.GetLength(1); y++)
+            {
+                if (grid[x, y] == null) continue;
+
+                // An attempt at combining cubes
                 int nextX = -1;
-                for (int i = x - 1; i >= 0; i--)
+                for (int i = x + 1; i < grid.GetLength(0); i++)
                 {
                     if (grid[i, y]) nextX = i;
                 }
@@ -224,15 +362,6 @@ public class GameManager : MonoBehaviour
                     grid[nextX, y] = grid[x, y];
                     grid[x, y] = null;
                     IncreaseColor(grid[nextX, y]);
-                }
-                */
-                for (int newX = 0; newX < x; newX++)
-                {
-                    if (grid[newX, y] == null)
-                    {
-                        grid[newX, y] = grid[x, y];
-                        grid[x, y] = null;
-                    }
                 }
             }
         }
@@ -247,27 +376,29 @@ public class GameManager : MonoBehaviour
                 if (grid[x, y] == null) continue;
 
                 // An attempt at combining cubes
-                /*
-                int nextX = -1;
-                for(int i = x + 1; i < grid.GetLength(0); i++)
-                {
-                    if (grid[i, y]) nextX = i;
-                }
+                //int nextX = -1;
+                //for (int i = x + 1; i < grid.GetLength(0); i++)
+                //{
+                //    if (grid[i, y]) nextX = i;
+                //}
 
-                if (nextX > -1 && HaveSameColor(grid[x, y], grid[nextX, y]))
+                //if (nextX > -1 && HaveSameColor(grid[x, y], grid[nextX, y]))
+                //{
+                //    toDestroy[nextX, y] = grid[nextX, y];
+                //    grid[nextX, y] = grid[x, y];
+                //    grid[x, y] = null;
+                //    IncreaseColor(grid[nextX, y]);
+                //    continue;
+                //}
+
+                //for (int newX = grid.GetLength(0) - 1; newX > x; newX--)
+                for (int newX = x + 1, currX = x; newX < grid.GetLength(0); newX++, currX++)
                 {
-                    toDestroy[nextX, y] = grid[nextX, y];
-                    grid[nextX, y] = grid[x, y];
-                    grid[x, y] = null;
-                    IncreaseColor(grid[nextX, y]);
-                }
-                */
-                for (int newX = grid.GetLength(0) - 1; newX > x; newX--)
-                {
+                    if (toDestroy[currX, y]) break;
                     if (grid[newX, y] == null)
                     {
-                        grid[newX, y] = grid[x, y];
-                        grid[x, y] = null;
+                        grid[newX, y] = grid[currX, y];
+                        grid[currX, y] = null;
                     }
                 }
             }
