@@ -177,7 +177,17 @@ public class GameManager : MonoBehaviour
                 int nextY = -1;
                 for (int i = y + 1; i < grid.GetLength(0); i++)
                 {
-                    if (grid[x, i]) nextY = i;
+                    if (grid[x, i])
+                    {
+                        if (HaveSameColor(grid[x, i], grid[x, y]))
+                        {
+                            nextY = i;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
 
                 if (nextY > -1 && HaveSameColor(grid[x, y], grid[x, nextY]))
@@ -186,7 +196,6 @@ public class GameManager : MonoBehaviour
                     grid[x, nextY] = grid[x, y];
                     grid[x, y] = null;
                     IncreaseColor(grid[x, nextY]);
-                    continue;
                 }
             }
         }
@@ -225,7 +234,17 @@ public class GameManager : MonoBehaviour
                 int nextY = -1;
                 for (int i = y - 1; i >= 0; i--)
                 {
-                    if (grid[x, i]) nextY = i;
+                    if (grid[x, i])
+                    {
+                        if (HaveSameColor(grid[x, i], grid[x, y]))
+                        {
+                            nextY = i;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
 
                 if (nextY > -1 && HaveSameColor(grid[x, y], grid[x, nextY]))
@@ -234,7 +253,6 @@ public class GameManager : MonoBehaviour
                     grid[x, nextY] = grid[x, y];
                     grid[x, y] = null;
                     IncreaseColor(grid[x, nextY]);
-                    continue;
                 }
             }
         }
@@ -289,7 +307,17 @@ public class GameManager : MonoBehaviour
                 int nextX = -1;
                 for (int i = x - 1; i >= 0; i--)
                 {
-                    if (grid[i, y]) nextX = i;
+                    if (grid[i, y])
+                    {
+                        if (HaveSameColor(grid[i, y], grid[x, y]))
+                        {
+                            nextX = i;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
 
                 if (nextX > -1 && HaveSameColor(grid[x, y], grid[nextX, y]))
@@ -353,7 +381,17 @@ public class GameManager : MonoBehaviour
                 int nextX = -1;
                 for (int i = x + 1; i < grid.GetLength(0); i++)
                 {
-                    if (grid[i, y]) nextX = i;
+                    if (grid[i, y])
+                    {
+                        if (HaveSameColor(grid[i, y], grid[x, y]))
+                        {
+                            nextX = i;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
                 }
 
                 if (nextX > -1 && HaveSameColor(grid[x, y], grid[nextX, y]))
